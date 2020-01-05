@@ -1,0 +1,25 @@
+import graphene
+from graphene import relay
+from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
+from connections.database import db_session
+
+{% for type in types -%}
+from models.{{ type.name }}.schema import {{ type.query }}, {{ type.mutation }}
+from models.{{ type.name }}.model import {{ type.gqlDef }}
+{% endfor %}
+
+# Sets up graphql Queries
+class Query({% for type in types -%}{{ type.query }},
+            {% endfor %} graphene.ObjectType):
+    node = relay.Node.Field()
+
+
+# Sets up graphql Mutations
+class Mutation({% for type in types %}{{ type.mutation }},
+               {% endfor %} graphene.ObjectType):
+    pass
+
+
+# Combines queries, mutations, and types to define graphql schema
+schema = graphene.Schema(query=Query, mutation=Mutation, types=[{% for type in types %}{{ type.gqlDef }},
+                                                                {% endfor %}])

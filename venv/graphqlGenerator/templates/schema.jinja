@@ -1,0 +1,50 @@
+from sqlalchemy import Column, DateTime, Integer, String
+
+import graphene
+from graphene import relay
+from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
+
+from connections.database import Base, db_session
+from models.{{ tableName }}.model import {{ className }} as {{ className }}Model, {{ className }}_gql
+
+
+# Defines graphql create Mutation
+class create{{ className }}(graphene.Mutation):
+    class Input:
+        {% for field in fields -%}
+            {{ field.name }} = graphene.{{ field.gtype }}()
+        {% endfor %}
+    ok = graphene.Boolean()
+    {{ objName }} = graphene.Field({{ className }}_gql)
+
+    @classmethod
+    def mutate(cls, _, args, context, info):
+        {{ objName }} = {{ className }}Model({% for field in fields -%}
+                            {{ field.name }}=args.get('{{ field.name }}'),
+                         {% endfor %}
+                         )      
+        db_session.add({{ objName }})
+        db_session.commit()
+        ok = True
+        return create{{ className }}({{ objName }}={{ objName }}, ok=ok)
+
+
+def resolve_find_{{ tableName }}(self, args, context, info):
+        query = {{ className }}_gql.get_query(context)
+        {{ primaryKey }} = args.get('{{ primaryKey }}')
+        return query.filter({{ className }}Model.{{ primaryKey }} == {{ primaryKey }}).first()
+
+
+# Defines graphql queries
+class {{ className }}Queries():
+    {{ tableName }} = SQLAlchemyConnectionField({{ className }}_gql)
+    find_{{ tableName }} = graphene.Field(lambda: {{ className }}_gql, name=graphene.String())
+    all_{{ tableName }}s = SQLAlchemyConnectionField({{ className }}_gql)
+
+    def resolve_find_{{ tableName }}(self, args, context, info):
+        return resolve_find_{{ tableName }}(self, args, context, info)
+
+
+# Defines graphql mutations
+class {{ className }}Mutations():
+    create_{{ tableName }} = create{{ className }}.Field()

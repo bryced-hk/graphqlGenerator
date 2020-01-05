@@ -1,0 +1,19 @@
+from sqlalchemy import Column, DateTime, Integer, String
+
+from graphene import relay
+from graphene_sqlalchemy import SQLAlchemyObjectType
+
+from connections.database import Base, db_session
+
+# Defines base class for SQLAlchemy
+class {{ className }}(Base):
+    __tablename__ = '{{ tableName }}'
+    {% for field in fields -%}
+        {{ field.name }} = Column({{ field.datatype }}(){% if field.name == primaryKey %}, primary_key=True{% endif %})
+    {% endfor %}
+
+# Defines specific table metaData
+class {{ className }}_gql(SQLAlchemyObjectType):
+    class Meta:
+        model = {{ className }}
+        interfaces = (relay.Node, )
