@@ -42,11 +42,11 @@ if len(sys.argv) < 1:
 
 else:
     # Connect to database
-    connection = pymysql.connect(host='localhost',
-                                port=5050,
-                                user='root',
-                                password='password',
-                                db='users',
+    connection = pymysql.connect(host=os.environ['DB_HOST'],
+                                port=os.environ['DB_PORT'],
+                                user=os.environ['DB_USERNAME'],
+                                password=os.environ['DB_PASSWORD'],
+                                db=os.environ['DB_NAME'],
                                 charset='utf8mb4',
                                 cursorclass=pymysql.cursors.DictCursor)
 

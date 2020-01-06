@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+
+  grahql:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DB: "mysql"
+      DB_CONNECTOR: "pymysql"
+      DB_USERNAME: "sqlalchemy"
+      DB_PASSWORD: "password"
+      DB_HOST: "192.168.254.51"
+      DB_PORT: "5050"
+      DB_NAME: "users"
